@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from travel_agency_backend.config import settings
+from travel_agency_backend.config.settings import settings
 from travel_agency_backend.models import Base
 
 # this is the Alembic Config object, which provides

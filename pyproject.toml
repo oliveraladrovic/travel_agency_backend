@@ -8,7 +8,11 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "sqlalchemy (>=2.0.49,<3.0.0)"
 ]
+
+[tool.poetry.dependencies]
+python = "^3.12"
 
 [tool.poetry]
 packages = [{include = "travel_agency_backend", from = "src"}]

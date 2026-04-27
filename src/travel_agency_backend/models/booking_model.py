@@ -31,9 +31,6 @@ class Booking(Base):
             "price_per_seat_snapshot >= 0", name="price_per_seat_snapshot_non_negative"
         ),
         CheckConstraint(
-            "price_per_seat_snapshot >= 0", name="price_per_seat_snapshot_non_negative"
-        ),
-        CheckConstraint(
             "total_price_snapshot >= 0", name="total_price_snapshot_non_negative"
         ),
     )

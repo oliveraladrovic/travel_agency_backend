@@ -4,7 +4,7 @@ from typing import Generator
 
 from ..config.settings import settings
 
-engine = create_engine(settings.database_url, echo=True)
+engine = create_engine(settings.database_url)
 SessionFactory = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 
 

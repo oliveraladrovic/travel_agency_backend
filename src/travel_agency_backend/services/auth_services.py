@@ -1,11 +1,14 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+import logging
 
 from ..schemas.user_schemas import UserRegister
 from ..models.user_model import User
 from ..utils.exceptions import EmailAlreadyExistsError
 from ..utils.security import hash_password
+
+logger = logging.getLogger(__name__)
 
 
 def register_user(session: Session, user_data: UserRegister) -> User:
@@ -13,6 +16,7 @@ def register_user(session: Session, user_data: UserRegister) -> User:
         select(User).where(User.email == user_data.email)
     ).scalar_one_or_none()
     if existing:
+        logger.warning("User %s already uses same email", existing.id)
         raise EmailAlreadyExistsError()
 
     new_user = User(
@@ -23,7 +27,9 @@ def register_user(session: Session, user_data: UserRegister) -> User:
         session.commit()
     except IntegrityError:
         session.rollback()
+        logger.warning("Integrity error while registering user")
         raise EmailAlreadyExistsError()
 
     session.refresh(new_user)
+    logger.info("User registered with ID: %s", new_user.id)
     return new_user

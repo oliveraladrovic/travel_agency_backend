@@ -43,7 +43,10 @@ def test_login_user_success(client: TestClient):
     )
     assert register.status_code == 201
 
-    response = client.post("/auth/login", json=FIRST_USER)
+    response = client.post(
+        "/auth/login",
+        data={"username": FIRST_USER["email"], "password": FIRST_USER["password"]},
+    )
     assert response.status_code == 200
 
     data = response.json()
@@ -59,7 +62,13 @@ def test_login_user_invalid_password(client: TestClient):
     )
     assert register.status_code == 201
 
-    response = client.post("/auth/login", json=SAME_EMAIL_USER)
+    response = client.post(
+        "/auth/login",
+        data={
+            "username": SAME_EMAIL_USER["email"],
+            "password": SAME_EMAIL_USER["password"],
+        },
+    )
     assert response.status_code == 401
 
     error = response.json()["error"]
@@ -74,9 +83,35 @@ def test_login_user_invalid_user(client: TestClient):
     )
     assert register.status_code == 201
 
-    response = client.post("/auth/login", json=SECOND_USER)
+    response = client.post(
+        "/auth/login",
+        data={"username": SECOND_USER["email"], "password": SECOND_USER["password"]},
+    )
     assert response.status_code == 401
 
     error = response.json()["error"]
     assert error["code"] == "INVALID_CREDENTIALS"
     assert error["message"] == "Invalid email or password"
+
+
+def test_get_current_user_info_success(client: TestClient):
+    register = client.post(
+        "/auth/register",
+        json=FIRST_USER,
+    )
+    assert register.status_code == 201
+
+    login = client.post(
+        "/auth/login",
+        data={"username": FIRST_USER["email"], "password": FIRST_USER["password"]},
+    )
+    assert login.status_code == 200
+
+    token = login.json()["access_token"]
+    response = client.get("/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+
+    data = response.json()
+    assert "id" in data
+    assert data["email"] == FIRST_USER["email"]
+    assert data["is_active"] is True

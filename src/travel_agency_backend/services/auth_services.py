@@ -43,9 +43,13 @@ def login_user(session: Session, user_data: UserLogin) -> str:
         logger.warning("Invalid login attempt")
         raise InvalidCredentialsError()
 
+    if not user.is_active:
+        logger.warning("Invalid login attempt")
+        raise InvalidCredentialsError()
+
     if not verify_password(user_data.password, user.hashed_password):
         logger.warning("Invalid login attempt")
         raise InvalidCredentialsError()
 
-    logger.info("User logged in with ID: %s", user.id)
+    logger.info("User %s logged in", user.id)
     return create_access_token({"sub": str(user.id), "role": user.role.value})

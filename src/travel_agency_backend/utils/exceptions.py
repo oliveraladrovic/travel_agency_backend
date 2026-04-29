@@ -11,3 +11,9 @@ class EmailAlreadyExistsError(DomainException):
     message: str = "Email already exists"
     code: str = "EMAIL_ALREADY_EXISTS"
     status_code: int = status.HTTP_409_CONFLICT
+
+
+class InvalidCredentialsError(DomainException):
+    message: str = "Invalid email or password"
+    code: str = "INVALID_CREDENTIALS"
+    status_code: int = status.HTTP_401_UNAUTHORIZED

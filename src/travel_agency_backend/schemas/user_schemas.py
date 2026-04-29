@@ -6,6 +6,11 @@ class UserRegister(BaseModel):
     password: str
 
 
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+
 class UserOutBasic(BaseModel):
     id: int
     email: EmailStr

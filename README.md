@@ -62,7 +62,12 @@ poetry install
 ```
 cp .env.example .env
 ```
-Create PostgreSQL databases and update the connection strings in `.env`.
+Create PostgreSQL databases and update the connection strings and JWT secret_key in `.env`.
+
+You can generate secure secret_key using:
+```
+python -c "import secrets; print(secrets.token_hex(32))"
+```
 
 ## Run migrations
 ```

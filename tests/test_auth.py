@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 
 FIRST_USER = {"email": "first.user@example.com", "password": "first_user"}
 SAME_EMAIL_USER = {"email": "first.user@example.com", "password": "same_email_user"}
+SECOND_USER = {"email": "second.user@example.com", "password": "second_user"}
 
 
 def test_register_user_success(client: TestClient):
@@ -33,3 +34,49 @@ def test_register_user_email_exists(client: TestClient):
     error = user2.json()["error"]
     assert error["code"] == "EMAIL_ALREADY_EXISTS"
     assert error["message"] == "Email already exists"
+
+
+def test_login_user_success(client: TestClient):
+    register = client.post(
+        "/auth/register",
+        json=FIRST_USER,
+    )
+    assert register.status_code == 201
+
+    response = client.post("/auth/login", json=FIRST_USER)
+    assert response.status_code == 200
+
+    data = response.json()
+    assert "access_token" in data
+    assert data["token_type"] == "bearer"
+    assert "expires_in" in data
+
+
+def test_login_user_invalid_password(client: TestClient):
+    register = client.post(
+        "/auth/register",
+        json=FIRST_USER,
+    )
+    assert register.status_code == 201
+
+    response = client.post("/auth/login", json=SAME_EMAIL_USER)
+    assert response.status_code == 401
+
+    error = response.json()["error"]
+    assert error["code"] == "INVALID_CREDENTIALS"
+    assert error["message"] == "Invalid email or password"
+
+
+def test_login_user_invalid_user(client: TestClient):
+    register = client.post(
+        "/auth/register",
+        json=FIRST_USER,
+    )
+    assert register.status_code == 201
+
+    response = client.post("/auth/login", json=SECOND_USER)
+    assert response.status_code == 401
+
+    error = response.json()["error"]
+    assert error["code"] == "INVALID_CREDENTIALS"
+    assert error["message"] == "Invalid email or password"

@@ -18,7 +18,7 @@ from ..models.user_model import User
 from ..utils.enums import UserRole
 
 hasher = PasswordHasher()
-oauth2_sheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
 def hash_password(password: str) -> str:
@@ -43,7 +43,7 @@ def create_access_token(data: dict) -> str:
 
 
 def get_current_user(
-    token: str = Depends(oauth2_sheme), session: Session = Depends(get_session)
+    token: str = Depends(oauth2_scheme), session: Session = Depends(get_session)
 ) -> User:
     try:
         payload = jwt.decode(
@@ -58,7 +58,9 @@ def get_current_user(
     if user_id is None:
         raise InvalidTokenError()
 
-    user = session.execute(select(User).where(User.id == user_id)).scalar_one_or_none()
+    user = session.execute(
+        select(User).where(User.id == int(user_id))
+    ).scalar_one_or_none()
     if user is None:
         raise InvalidTokenError()
 

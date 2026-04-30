@@ -100,10 +100,10 @@ Implemented:
 - logging foundation
 - testing infrastructure
 - CI pipeline
-
-In progress:
 - JWT authentication
 - authorization
+
+In progress:
 - booking system
 - admin features
 

@@ -6,9 +6,13 @@ from typing import Generator
 from fastapi.testclient import TestClient
 
 from travel_agency_backend.config.settings import settings
-from travel_agency_backend.models import Base
+from travel_agency_backend.models import Base, User
 from travel_agency_backend.main import app
 from travel_agency_backend.db.session import get_session
+from travel_agency_backend.utils.enums import UserRole
+from travel_agency_backend.utils.security import hash_password
+from travel_agency_backend.services import auth_services
+from travel_agency_backend.schemas.user_schemas import UserLogin
 
 engine = create_engine(settings.test_database_url)
 TestingSessionFactory = sessionmaker(bind=engine, autoflush=False)
@@ -64,3 +68,24 @@ def client(db_session: Session) -> Generator[TestClient, None, None]:
         yield client
 
     app.dependency_overrides.clear()
+
+
+def create_test_user(
+    session: Session, email: str, password: str, role: UserRole, is_active: bool = True
+) -> User:
+    hashed_password = hash_password(password)
+    new_user = User(
+        email=email, hashed_password=hashed_password, role=role, is_active=is_active
+    )
+    session.add(new_user)
+    session.commit()
+    session.refresh(new_user)
+    return new_user
+
+
+@pytest.fixture()
+def admin_headers(db_session: Session) -> dict[str, str]:
+    admin = UserLogin(email="admin@example.com", password="admin")
+    create_test_user(db_session, admin.email, admin.password, UserRole.ADMIN)
+    token = auth_services.login_user(db_session, admin)
+    return {"Authorization": f"Bearer {token}"}

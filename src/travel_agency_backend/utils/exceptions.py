@@ -35,3 +35,9 @@ class AdminPrivilegesRequiredError(DomainException):
     message: str = "Admin privileges required"
     code: str = "ADMIN_PRIVILEGES_REQUIRED"
     status_code: int = status.HTTP_403_FORBIDDEN
+
+
+class TripAlreadyExistsError(DomainException):
+    message: str = "Trip slug already exists"
+    code: str = "TRIP_ALREADY_EXISTS"
+    status_code: int = status.HTTP_409_CONFLICT

@@ -14,7 +14,7 @@ class RequestIDFilter(logging.Filter):
 def setup_logging() -> None:
     handler = logging.StreamHandler()
     formatter = logging.Formatter(
-        "[%(request_id)s][%(asctime)s] %(levelname)s: %(message)s - (%(name)s)"
+        "[%(asctime)s] %(levelname)s: %(message)s - (%(name)s - ID: %(request_id)s)"
     )
     handler.setFormatter(formatter)
     handler.addFilter(RequestIDFilter())

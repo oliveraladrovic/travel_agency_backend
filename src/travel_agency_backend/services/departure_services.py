@@ -13,7 +13,9 @@ from ..utils.exceptions import (
     DeleteConflictError,
     InvalidDepartureDateError,
     DepartureIntegrityError,
+    TripNotFoundError,
 )
+
 
 logger = logging.getLogger(__name__)
 
@@ -50,8 +52,35 @@ def list_departures_admin(session: Session) -> list[Departure]:
     return session.scalars(select(Departure)).all()
 
 
+def list_departures_by_trip(session: Session, trip_id: int) -> list[Departure]:
+    trip = _get_trip_or_404(session, trip_id)
+    if not trip.is_active:
+        logger.info("Public access denied for inactive trip %s", trip_id)
+        raise TripNotFoundError()
+
+    return session.scalars(
+        select(Departure).where(
+            Departure.trip_id == trip_id,
+            Departure.is_active,
+            Departure.start_date >= date.today(),
+        )
+    ).all()
+
+
 def get_departure_admin(session: Session, departure_id: int) -> Departure:
     return _get_departure_or_404(session, departure_id)
+
+
+def get_departure(session: Session, departure_id: int) -> Departure:
+    departure = _get_departure_or_404(session, departure_id)
+    if not departure.trip.is_active:
+        logger.info("Public access denied for inactive trip %s", departure.trip_id)
+        raise TripNotFoundError()
+    if not departure.is_active:
+        logger.info("Public access denied for inactive departure %s", departure_id)
+        raise DepartureNotFoundError()
+
+    return departure
 
 
 def update_departure(

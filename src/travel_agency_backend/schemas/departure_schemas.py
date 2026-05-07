@@ -30,3 +30,13 @@ class DepartureOutAdmin(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class DepartureOutUnprotected(BaseModel):
+    id: int
+    trip_id: int
+    start_date: date
+    capacity: int
+    price_per_seat: Decimal
+
+    model_config = ConfigDict(from_attributes=True)

@@ -49,8 +49,21 @@ def list_trips_admin(session: Session) -> list[Trip]:
     return session.scalars(select(Trip)).all()
 
 
+def list_trips(session: Session) -> list[Trip]:
+    return session.scalars(select(Trip).where(Trip.is_active)).all()
+
+
 def get_trip_admin(session: Session, trip_id: int) -> Trip:
     return _get_trip_or_404(session, trip_id)
+
+
+def get_trip(session: Session, trip_id: int) -> Trip:
+    trip = _get_trip_or_404(session, trip_id)
+    if not trip.is_active:
+        logger.info("Public access denied for inactive trip %s", trip_id)
+        raise TripNotFoundError()
+
+    return trip
 
 
 def update_trip(session: Session, trip_id: int, trip_data: TripUpdate) -> Trip:

@@ -27,3 +27,13 @@ class TripOutAdmin(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class TripOutUnprotected(BaseModel):
+    id: int
+    name: str
+    slug: str
+    description: str | None = None
+    duration_days: int
+
+    model_config = ConfigDict(from_attributes=True)

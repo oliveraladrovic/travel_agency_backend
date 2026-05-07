@@ -9,11 +9,18 @@ class TripCreate(BaseModel):
     is_active: bool = False
 
 
+class TripUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    duration_days: int | None = Field(default=None, ge=1)
+    is_active: bool | None = None
+
+
 class TripOutAdmin(BaseModel):
     id: int
     name: str
     slug: str
-    description: str | None
+    description: str | None = None
     duration_days: int
     is_active: bool
     created_at: datetime

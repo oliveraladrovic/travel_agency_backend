@@ -41,3 +41,15 @@ class TripAlreadyExistsError(DomainException):
     message: str = "Trip slug already exists"
     code: str = "TRIP_ALREADY_EXISTS"
     status_code: int = status.HTTP_409_CONFLICT
+
+
+class TripNotFoundError(DomainException):
+    message: str = "Trip not found"
+    code: str = "TRIP_NOT_FOUND"
+    status_code: int = status.HTTP_404_NOT_FOUND
+
+
+class DeleteConflictError(DomainException):
+    mesage: str = "Conflict while deleting resource"
+    code: str = "DELETE_CONFLICT"
+    status_code: int = status.HTTP_409_CONFLICT

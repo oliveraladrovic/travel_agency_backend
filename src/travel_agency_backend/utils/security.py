@@ -54,13 +54,13 @@ def get_current_user(
     except jwt.InvalidTokenError:
         raise InvalidTokenError()
 
-    user_id = payload.get("sub")
-    if user_id is None:
+    user_id_raw = payload.get("sub")
+    try:
+        user_id = int(user_id_raw)
+    except (ValueError, TypeError):
         raise InvalidTokenError()
 
-    user = session.execute(
-        select(User).where(User.id == int(user_id))
-    ).scalar_one_or_none()
+    user = session.execute(select(User).where(User.id == user_id)).scalar_one_or_none()
     if user is None:
         raise InvalidTokenError()
 

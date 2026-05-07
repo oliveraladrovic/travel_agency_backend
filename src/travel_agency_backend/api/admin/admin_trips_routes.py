@@ -29,7 +29,7 @@ def get_trip(trip_id: int, session: Session = Depends(get_session)):
     return trip_services.get_trip_admin(session, trip_id)
 
 
-@router.put("/{trip_id}", response_model=TripOutAdmin)
+@router.patch("/{trip_id}", response_model=TripOutAdmin)
 def update_trip(
     trip_id: int, trip_in: TripUpdate, session: Session = Depends(get_session)
 ):
@@ -39,5 +39,5 @@ def update_trip(
 
 @router.delete("/{trip_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_trip(trip_id: int, session: Session = Depends(get_session)):
-    logger.info("Attempting to delete trip")
+    logger.info("Attempting to delete trip %s", trip_id)
     return trip_services.delete_trip(session, trip_id)

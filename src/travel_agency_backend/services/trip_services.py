@@ -9,6 +9,7 @@ from ..schemas.trip_schemas import TripCreate, TripUpdate
 from ..utils.exceptions import (
     TripAlreadyExistsError,
     TripNotFoundError,
+    UpdateConflictError,
     DeleteConflictError,
 )
 
@@ -52,7 +53,7 @@ def get_trip_admin(session: Session, trip_id: int) -> Trip:
     return _get_trip_or_404(session, trip_id)
 
 
-def update_trip(session: Session, trip_id: int, trip_data: TripUpdate):
+def update_trip(session: Session, trip_id: int, trip_data: TripUpdate) -> Trip:
     trip = _get_trip_or_404(session, trip_id)
 
     update_data = trip_data.model_dump(exclude_unset=True)
@@ -78,11 +79,11 @@ def update_trip(session: Session, trip_id: int, trip_data: TripUpdate):
 
     try:
         session.commit()
-        logger.info("Trip updated successfully")
+        logger.info("Trip %s updated successfully", trip_id)
     except IntegrityError:
         session.rollback()
         logger.warning("Integrity error while updating trip %s", trip_id)
-        raise TripAlreadyExistsError()
+        raise UpdateConflictError()
 
     session.refresh(trip)
     return trip

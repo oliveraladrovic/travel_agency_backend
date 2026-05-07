@@ -50,6 +50,30 @@ class TripNotFoundError(DomainException):
 
 
 class DeleteConflictError(DomainException):
-    mesage: str = "Conflict while deleting resource"
+    message: str = "Conflict while deleting resource"
     code: str = "DELETE_CONFLICT"
+    status_code: int = status.HTTP_409_CONFLICT
+
+
+class UpdateConflictError(DomainException):
+    message: str = "Conflict while updating resource"
+    code: str = "UPDATE_CONFLICT"
+    status_code: int = status.HTTP_409_CONFLICT
+
+
+class DepartureNotFoundError(DomainException):
+    message: str = "Departure not found"
+    code: str = "DEPARTURE_NOT_FOUND"
+    status_code: int = status.HTTP_404_NOT_FOUND
+
+
+class InvalidDepartureDateError(DomainException):
+    message: str = "Departure date must be in future"
+    code: str = "INVALID_DEPARTURE_DATE"
+    status_code: int = status.HTTP_400_BAD_REQUEST
+
+
+class DepartureIntegrityError(DomainException):
+    message: str = "Integrity error while creating departure"
+    code: str = "DEPARTURE_INTEGRITY_ERROR"
     status_code: int = status.HTTP_409_CONFLICT

@@ -8,7 +8,7 @@ from ...services import trip_services
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/trips", tags=["admin trips"])
+router = APIRouter(prefix="/trips", tags=["Admin: Trips"])
 
 
 @router.post("/", response_model=TripOutAdmin, status_code=status.HTTP_201_CREATED)

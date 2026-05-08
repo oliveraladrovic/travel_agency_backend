@@ -12,7 +12,7 @@ from ...services import departure_services
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/departures", tags=["admin departures"])
+router = APIRouter(prefix="/departures", tags=["Admin: Departures"])
 
 
 @router.post("/", response_model=DepartureOutAdmin, status_code=status.HTTP_201_CREATED)

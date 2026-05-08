@@ -79,6 +79,9 @@ def get_departure(session: Session, departure_id: int) -> Departure:
     if not departure.is_active:
         logger.info("Public access denied for inactive departure %s", departure_id)
         raise DepartureNotFoundError()
+    if departure.start_date < date.today():
+        logger.info("Public access denied for past departure %s", departure_id)
+        raise DepartureNotFoundError()
 
     return departure
 

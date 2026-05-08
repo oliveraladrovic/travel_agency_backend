@@ -89,3 +89,13 @@ def admin_headers(db_session: Session) -> dict[str, str]:
     create_test_user(db_session, admin.email, admin.password, UserRole.ADMIN)
     token = auth_services.login_user(db_session, admin)
     return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture()
+def user_headers(db_session: Session) -> dict[str, str]:
+    test_user = UserLogin(email="test_user@example.com", password="test_user")
+    create_test_user(
+        db_session, test_user.email, test_user.password, UserRole.PASSENGER
+    )
+    token = auth_services.login_user(db_session, test_user)
+    return {"Authorization": f"Bearer {token}"}

@@ -77,3 +77,15 @@ class DepartureIntegrityError(DomainException):
     message: str = "Integrity error while creating departure"
     code: str = "DEPARTURE_INTEGRITY_ERROR"
     status_code: int = status.HTTP_409_CONFLICT
+
+
+class UnavailableDepartureError(DomainException):
+    message: str = "Departure not available"
+    code: str = "DEPARTURE_NOT_AVAILABLE"
+    status_code: int = status.HTTP_400_BAD_REQUEST
+
+
+class CapacityExceededError(DomainException):
+    message: str = "Unavailable capacity"
+    code: str = "UNAVAILABLE_CAPACITY"
+    status_code: int = status.HTTP_409_CONFLICT

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from .api import auth_routes, admin_routes
+from .api import auth_routes, admin_routes, booking_routes
 from .api.unprotected import unprotected_trips_routes, unprotected_departures_routes
 from .api.middleware import RequestIDMiddleware
 from .utils.exceptions import DomainException
@@ -29,6 +29,7 @@ app.include_router(auth_routes.router)
 app.include_router(admin_routes.router)
 app.include_router(unprotected_trips_routes.router)
 app.include_router(unprotected_departures_routes.router)
+app.include_router(booking_routes.router)
 
 
 @app.get("/health")

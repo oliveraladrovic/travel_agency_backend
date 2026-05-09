@@ -22,3 +22,10 @@ class BookingOut(BaseModel):
     payment_deadline: date
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class BookingSummary(BaseModel):
+    id: int
+    seats: int
+    price_per_seat: Decimal
+    status: BookingStatus

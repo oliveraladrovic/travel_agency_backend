@@ -89,3 +89,9 @@ class CapacityExceededError(DomainException):
     message: str = "Unavailable capacity"
     code: str = "UNAVAILABLE_CAPACITY"
     status_code: int = status.HTTP_409_CONFLICT
+
+
+class BookingNotFoundError(DomainException):
+    message: str = "Booking not found"
+    code: str = "BOOKING_NOT_FOUND"
+    status_code: int = status.HTTP_404_NOT_FOUND

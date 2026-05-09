@@ -8,9 +8,14 @@ from ..models.user_model import User
 from ..models.booking_model import Booking
 from ..models.departure_model import Departure
 from ..models.trip_model import Trip
-from ..schemas.booking_schemas import BookingCreate
+from ..schemas.booking_schemas import BookingCreate, BookingSummary
+from ..schemas.departure_schemas import DepartureSummary
 from ..utils.enums import BookingStatus
-from ..utils.exceptions import UnavailableDepartureError, CapacityExceededError
+from ..utils.exceptions import (
+    UnavailableDepartureError,
+    CapacityExceededError,
+    BookingNotFoundError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +46,71 @@ def create_booking(
     session.refresh(new_booking)
     logger.info("Booking %s created for user %d", new_booking.id, user.id)
     return new_booking
+
+
+def list_bookings(session: Session, user: User) -> list[Booking]:
+    return session.scalars(select(Booking).where(Booking.user_id == user.id)).all()
+
+
+def list_summary(session: Session, user: User) -> list[DepartureSummary]:
+    departures = session.scalars(
+        select(Departure).join(Booking).where(Booking.user_id == user.id).distinct()
+    ).all()
+    return [
+        DepartureSummary(
+            departure_id=dep.id,
+            trip_name=dep.trip.name,
+            start_date=dep.start_date,
+            total_seats=sum(
+                booking.seats_reserved
+                for booking in dep.bookings
+                if booking.user_id == user.id
+            ),
+            confirmed_seats=sum(
+                booking.seats_reserved
+                for booking in dep.bookings
+                if booking.status == BookingStatus.CONFIRMED
+                and booking.user_id == user.id
+            ),
+            reserved_seats=sum(
+                booking.seats_reserved
+                for booking in dep.bookings
+                if booking.status == BookingStatus.RESERVED
+                and booking.user_id == user.id
+            ),
+            total_price=sum(
+                booking.total_price_snapshot
+                for booking in dep.bookings
+                if booking.user_id == user.id
+            ),
+            bookings=[
+                BookingSummary(
+                    id=booking.id,
+                    seats=booking.seats_reserved,
+                    price_per_seat=booking.price_per_seat_snapshot,
+                    status=booking.status,
+                )
+                for booking in dep.bookings
+                if booking.user_id == user.id
+            ],
+        )
+        for dep in departures
+    ]
+
+
+def get_booking(session: Session, user: User, booking_id: int) -> Booking:
+    return _get_booking_or_404(session, user.id, booking_id)
+
+
+def _get_booking_or_404(session: Session, user_id: int, booking_id: int) -> Booking:
+    booking = session.scalar(
+        select(Booking).where(Booking.id == booking_id, Booking.user_id == user_id)
+    )
+    if booking is None:
+        logger.warning("Booking %s is not available for user %d", booking_id, user_id)
+        raise BookingNotFoundError()
+
+    return booking
 
 
 def _get_valid_departure_or_404(session: Session, departure_id: int) -> Departure:

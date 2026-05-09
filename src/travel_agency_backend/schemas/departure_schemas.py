@@ -2,6 +2,8 @@ from pydantic import BaseModel, Field, ConfigDict
 from datetime import date, datetime
 from decimal import Decimal
 
+from ..schemas.booking_schemas import BookingSummary
+
 
 class DepartureCreate(BaseModel):
     trip_id: int
@@ -40,3 +42,14 @@ class DepartureOutUnprotected(BaseModel):
     price_per_seat: Decimal
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class DepartureSummary(BaseModel):
+    departure_id: int
+    trip_name: str
+    start_date: date
+    total_seats: int
+    confirmed_seats: int
+    reserved_seats: int
+    total_price: Decimal
+    bookings: list[BookingSummary]

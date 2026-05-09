@@ -159,3 +159,128 @@ def test_create_booking_exceeds_capacity(
     error = response.json()["error"]
     assert error["code"] == "UNAVAILABLE_CAPACITY"
     assert error["message"] == "Unavailable capacity"
+
+
+def test_list_bookings_success(
+    client: TestClient, admin_headers: dict[str, str], user_headers: dict[str, str]
+):
+    trip = client.post("/admin/trips/", headers=admin_headers, json=TRIP_1)
+    trip_id = trip.json()["id"]
+
+    departure_data = DEP_DATA_1.copy()
+    departure_data["trip_id"] = trip_id
+    departure = client.post(
+        "/admin/departures/", headers=admin_headers, json=departure_data
+    )
+    departure_id = departure.json()["id"]
+
+    booking_data1 = {"departure_id": departure_id, "seats_reserved": 2}
+    booking_data2 = {"departure_id": departure_id, "seats_reserved": 3}
+    client.post("/bookings/", headers=user_headers, json=booking_data1)
+    client.post("/bookings/", headers=user_headers, json=booking_data2)
+
+    response = client.get("/bookings/me", headers=user_headers)
+    assert response.status_code == 200
+
+
+def test_list_summary_success(
+    client: TestClient, admin_headers: dict[str, str], user_headers: dict[str, str]
+):
+    trip = client.post("/admin/trips/", headers=admin_headers, json=TRIP_1)
+    trip_id = trip.json()["id"]
+
+    departure_data = DEP_DATA_1.copy()
+    departure_data["trip_id"] = trip_id
+    departure = client.post(
+        "/admin/departures/", headers=admin_headers, json=departure_data
+    )
+    departure_id = departure.json()["id"]
+
+    booking_data1 = {"departure_id": departure_id, "seats_reserved": 2}
+    booking_data2 = {"departure_id": departure_id, "seats_reserved": 3}
+    client.post("/bookings/", headers=user_headers, json=booking_data1)
+    client.post("/bookings/", headers=user_headers, json=booking_data2)
+
+    response = client.get("/bookings/me/summary", headers=user_headers)
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data[0]["total_seats"] == 5
+    assert len(data[0]["bookings"]) == 2
+
+
+def test_get_booking_success(
+    client: TestClient, admin_headers: dict[str, str], user_headers: dict[str, str]
+):
+    trip = client.post("/admin/trips/", headers=admin_headers, json=TRIP_1)
+    trip_id = trip.json()["id"]
+
+    departure_data = DEP_DATA_1.copy()
+    departure_data["trip_id"] = trip_id
+    departure = client.post(
+        "/admin/departures/", headers=admin_headers, json=departure_data
+    )
+    departure_id = departure.json()["id"]
+
+    booking_data = {"departure_id": departure_id, "seats_reserved": 2}
+    booking = client.post("/bookings/", headers=user_headers, json=booking_data)
+    booking_id = booking.json()["id"]
+
+    response = client.get(f"/bookings/{booking_id}", headers=user_headers)
+    assert response.status_code == 200
+    assert response.json()["id"] == booking_id
+
+
+def test_get_booking_not_existing(
+    client: TestClient, admin_headers: dict[str, str], user_headers: dict[str, str]
+):
+    trip = client.post("/admin/trips/", headers=admin_headers, json=TRIP_1)
+    trip_id = trip.json()["id"]
+
+    departure_data = DEP_DATA_1.copy()
+    departure_data["trip_id"] = trip_id
+    departure = client.post(
+        "/admin/departures/", headers=admin_headers, json=departure_data
+    )
+    departure_id = departure.json()["id"]
+
+    booking_data = {"departure_id": departure_id, "seats_reserved": 2}
+    client.post("/bookings/", headers=user_headers, json=booking_data)
+
+    response = client.get("/bookings/999", headers=user_headers)
+    assert response.status_code == 404
+
+    error = response.json()["error"]
+    assert error["code"] == "BOOKING_NOT_FOUND"
+    assert error["message"] == "Booking not found"
+
+
+def test_get_booking_other_user(
+    client: TestClient,
+    admin_headers: dict[str, str],
+    user_headers: dict[str, str],
+    user_headers2: dict[str, str],
+):
+    trip = client.post("/admin/trips/", headers=admin_headers, json=TRIP_1)
+    trip_id = trip.json()["id"]
+
+    departure_data = DEP_DATA_1.copy()
+    departure_data["trip_id"] = trip_id
+    departure = client.post(
+        "/admin/departures/", headers=admin_headers, json=departure_data
+    )
+    departure_id = departure.json()["id"]
+
+    booking_data = {"departure_id": departure_id, "seats_reserved": 2}
+    client.post("/bookings/", headers=user_headers, json=booking_data)
+
+    booking_data2 = {"departure_id": departure_id, "seats_reserved": 3}
+    user2_booking = client.post("/bookings/", headers=user_headers2, json=booking_data2)
+    user2_booking_id = user2_booking.json()["id"]
+
+    response = client.get(f"/bookings/{user2_booking_id}", headers=user_headers)
+    assert response.status_code == 404
+
+    error = response.json()["error"]
+    assert error["code"] == "BOOKING_NOT_FOUND"
+    assert error["message"] == "Booking not found"

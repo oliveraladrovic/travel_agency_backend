@@ -29,3 +29,7 @@ class BookingSummary(BaseModel):
     seats: int
     price_per_seat: Decimal
     status: BookingStatus
+
+
+class BookingUpdate(BaseModel):
+    seats_reserved: int = Field(..., ge=1)

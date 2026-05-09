@@ -8,7 +8,7 @@ from ..models.user_model import User
 from ..models.booking_model import Booking
 from ..models.departure_model import Departure
 from ..models.trip_model import Trip
-from ..schemas.booking_schemas import BookingCreate, BookingSummary
+from ..schemas.booking_schemas import BookingCreate, BookingSummary, BookingUpdate
 from ..schemas.departure_schemas import DepartureSummary
 from ..utils.enums import BookingStatus
 from ..utils.exceptions import (
@@ -18,6 +18,7 @@ from ..utils.exceptions import (
     InvalidBookingStatusError,
     PaymentDeadlinePassedError,
     BookingUpdateConflictError,
+    InvalidNumberOfSeatsError,
 )
 
 logger = logging.getLogger(__name__)
@@ -145,6 +146,34 @@ def cancel_booking(session: Session, user: User, booking_id: int) -> Booking:
         raise BookingUpdateConflictError()
 
     logger.info("Booking %s cancelled", booking_id)
+    session.refresh(booking)
+    return booking
+
+
+def update_booking(
+    session: Session, user: User, update_data: BookingUpdate, booking_id: int
+):
+    booking = _get_booking_or_404(session, user.id, booking_id)
+    if booking.status != BookingStatus.RESERVED:
+        logger.warning("Booking %s is not in RESERVED status", booking_id)
+        raise InvalidBookingStatusError()
+
+    if update_data.seats_reserved >= booking.seats_reserved:
+        logger.warning("Invalid number of seats for update booking %s", booking_id)
+        raise InvalidNumberOfSeatsError()
+
+    try:
+        booking.seats_reserved = update_data.seats_reserved
+        booking.total_price_snapshot = (
+            booking.price_per_seat_snapshot * update_data.seats_reserved
+        )
+        session.commit()
+    except IntegrityError:
+        logger.warning("Integrity error while cancelling booking %s", booking_id)
+        session.rollback()
+        raise BookingUpdateConflictError()
+
+    logger.info("Booking %s updated", booking_id)
     session.refresh(booking)
     return booking
 

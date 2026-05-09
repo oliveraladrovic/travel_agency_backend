@@ -113,3 +113,9 @@ class BookingUpdateConflictError(DomainException):
     message: str = "Failed to change booking status"
     code: str = "BOOKING_STATUS_CHANGE_FAILED"
     status_code: int = status.HTTP_409_CONFLICT
+
+
+class InvalidNumberOfSeatsError(DomainException):
+    message: str = "Invalid number of seats"
+    code: str = "INVALID_NUMBER_OF_SEATS"
+    status_code: int = status.HTTP_409_CONFLICT

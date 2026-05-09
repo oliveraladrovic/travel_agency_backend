@@ -2,7 +2,7 @@ import logging
 from fastapi import APIRouter, status, Depends
 from sqlalchemy.orm import Session
 
-from ..schemas.booking_schemas import BookingCreate, BookingOut
+from ..schemas.booking_schemas import BookingCreate, BookingOut, BookingUpdate
 from ..schemas.departure_schemas import DepartureSummary
 from ..models.user_model import User
 from ..utils.security import get_current_user
@@ -68,3 +68,14 @@ def cancel_booking(
 ):
     logger.info("User %s attempting to cancel booking %d", user.id, booking_id)
     return booking_services.cancel_booking(session, user, booking_id)
+
+
+@router.patch("/{booking_id}", response_model=BookingOut)
+def update_booking(
+    booking_id: int,
+    update_data: BookingUpdate,
+    user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    logger.info("User %s attempting to update booking %d", user.id, booking_id)
+    return booking_services.update_booking(session, user, update_data, booking_id)

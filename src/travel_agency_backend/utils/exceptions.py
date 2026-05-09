@@ -95,3 +95,21 @@ class BookingNotFoundError(DomainException):
     message: str = "Booking not found"
     code: str = "BOOKING_NOT_FOUND"
     status_code: int = status.HTTP_404_NOT_FOUND
+
+
+class InvalidBookingStatusError(DomainException):
+    message: str = "Booking status must be RESERVED"
+    code: str = "INVALID_BOOKING_STATUS"
+    status_code: int = status.HTTP_409_CONFLICT
+
+
+class PaymentDeadlinePassedError(DomainException):
+    message: str = "Payment deadline has passed"
+    code: str = "PAYMENT_DEADLINE_PASSED"
+    status_code: int = status.HTTP_409_CONFLICT
+
+
+class BookingUpdateConflictError(DomainException):
+    message: str = "Failed to change booking status"
+    code: str = "BOOKING_STATUS_CHANGE_FAILED"
+    status_code: int = status.HTTP_409_CONFLICT

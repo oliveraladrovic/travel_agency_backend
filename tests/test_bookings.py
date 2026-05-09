@@ -284,3 +284,105 @@ def test_get_booking_other_user(
     error = response.json()["error"]
     assert error["code"] == "BOOKING_NOT_FOUND"
     assert error["message"] == "Booking not found"
+
+
+def test_confirm_booking_success(
+    client: TestClient, admin_headers: dict[str, str], user_headers: dict[str, str]
+):
+    trip = client.post("/admin/trips/", headers=admin_headers, json=TRIP_1)
+    trip_id = trip.json()["id"]
+
+    departure_data = DEP_DATA_1.copy()
+    departure_data["trip_id"] = trip_id
+    departure = client.post(
+        "/admin/departures/", headers=admin_headers, json=departure_data
+    )
+    departure_id = departure.json()["id"]
+
+    booking_data = {"departure_id": departure_id, "seats_reserved": 2}
+    booking = client.post("/bookings/", headers=user_headers, json=booking_data)
+    booking_id = booking.json()["id"]
+
+    response = client.post(f"/bookings/{booking_id}/confirm", headers=user_headers)
+    assert response.status_code == 200
+    assert response.json()["status"] == BookingStatus.CONFIRMED.value
+
+
+def test_confirm_booking_wrong_status(
+    client: TestClient, admin_headers: dict[str, str], user_headers: dict[str, str]
+):
+    trip = client.post("/admin/trips/", headers=admin_headers, json=TRIP_1)
+    trip_id = trip.json()["id"]
+
+    departure_data = DEP_DATA_1.copy()
+    departure_data["trip_id"] = trip_id
+    departure = client.post(
+        "/admin/departures/", headers=admin_headers, json=departure_data
+    )
+    departure_id = departure.json()["id"]
+
+    booking_data = {"departure_id": departure_id, "seats_reserved": 2}
+    booking = client.post("/bookings/", headers=user_headers, json=booking_data)
+    booking_id = booking.json()["id"]
+
+    response = client.post(f"/bookings/{booking_id}/confirm", headers=user_headers)
+    assert response.status_code == 200
+    assert response.json()["status"] == BookingStatus.CONFIRMED.value
+
+    response = client.post(f"/bookings/{booking_id}/confirm", headers=user_headers)
+    assert response.status_code == 409
+
+    error = response.json()["error"]
+    assert error["code"] == "INVALID_BOOKING_STATUS"
+    assert error["message"] == "Booking status must be RESERVED"
+
+
+def test_cancel_booking_success(
+    client: TestClient, admin_headers: dict[str, str], user_headers: dict[str, str]
+):
+    trip = client.post("/admin/trips/", headers=admin_headers, json=TRIP_1)
+    trip_id = trip.json()["id"]
+
+    departure_data = DEP_DATA_1.copy()
+    departure_data["trip_id"] = trip_id
+    departure = client.post(
+        "/admin/departures/", headers=admin_headers, json=departure_data
+    )
+    departure_id = departure.json()["id"]
+
+    booking_data = {"departure_id": departure_id, "seats_reserved": 2}
+    booking = client.post("/bookings/", headers=user_headers, json=booking_data)
+    booking_id = booking.json()["id"]
+
+    response = client.post(f"/bookings/{booking_id}/cancel", headers=user_headers)
+    assert response.status_code == 200
+    assert response.json()["status"] == BookingStatus.CANCELLED.value
+
+
+def test_cancel_booking_wrong_status(
+    client: TestClient, admin_headers: dict[str, str], user_headers: dict[str, str]
+):
+    trip = client.post("/admin/trips/", headers=admin_headers, json=TRIP_1)
+    trip_id = trip.json()["id"]
+
+    departure_data = DEP_DATA_1.copy()
+    departure_data["trip_id"] = trip_id
+    departure = client.post(
+        "/admin/departures/", headers=admin_headers, json=departure_data
+    )
+    departure_id = departure.json()["id"]
+
+    booking_data = {"departure_id": departure_id, "seats_reserved": 2}
+    booking = client.post("/bookings/", headers=user_headers, json=booking_data)
+    booking_id = booking.json()["id"]
+
+    response = client.post(f"/bookings/{booking_id}/confirm", headers=user_headers)
+    assert response.status_code == 200
+    assert response.json()["status"] == BookingStatus.CONFIRMED.value
+
+    response = client.post(f"/bookings/{booking_id}/cancel", headers=user_headers)
+    assert response.status_code == 409
+
+    error = response.json()["error"]
+    assert error["code"] == "INVALID_BOOKING_STATUS"
+    assert error["message"] == "Booking status must be RESERVED"

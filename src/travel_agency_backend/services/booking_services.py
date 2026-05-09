@@ -2,7 +2,7 @@ import logging
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime, timezone
 
 from ..models.user_model import User
 from ..models.booking_model import Booking
@@ -15,6 +15,9 @@ from ..utils.exceptions import (
     UnavailableDepartureError,
     CapacityExceededError,
     BookingNotFoundError,
+    InvalidBookingStatusError,
+    PaymentDeadlinePassedError,
+    BookingUpdateConflictError,
 )
 
 logger = logging.getLogger(__name__)
@@ -100,6 +103,50 @@ def list_summary(session: Session, user: User) -> list[DepartureSummary]:
 
 def get_booking(session: Session, user: User, booking_id: int) -> Booking:
     return _get_booking_or_404(session, user.id, booking_id)
+
+
+def confirm_booking(session: Session, user: User, booking_id: int) -> Booking:
+    booking = _get_booking_or_404(session, user.id, booking_id)
+    if booking.status != BookingStatus.RESERVED:
+        logger.warning("Booking %s is not in RESERVED status", booking_id)
+        raise InvalidBookingStatusError()
+
+    if booking.payment_deadline < date.today():
+        logger.warning("Payment deadline for booking %s has passed", booking_id)
+        raise PaymentDeadlinePassedError()
+
+    try:
+        booking.status = BookingStatus.CONFIRMED
+        booking.confirmed_at = datetime.now(timezone.utc)
+        session.commit()
+    except IntegrityError:
+        logger.warning("Integrity error while confirming booking %s", booking_id)
+        session.rollback()
+        raise BookingUpdateConflictError()
+
+    logger.info("Booking %s confirmed", booking_id)
+    session.refresh(booking)
+    return booking
+
+
+def cancel_booking(session: Session, user: User, booking_id: int) -> Booking:
+    booking = _get_booking_or_404(session, user.id, booking_id)
+    if booking.status != BookingStatus.RESERVED:
+        logger.warning("Booking %s is not in RESERVED status", booking_id)
+        raise InvalidBookingStatusError()
+
+    try:
+        booking.status = BookingStatus.CANCELLED
+        booking.cancelled_at = datetime.now(timezone.utc)
+        session.commit()
+    except IntegrityError:
+        logger.warning("Integrity error while cancelling booking %s", booking_id)
+        session.rollback()
+        raise BookingUpdateConflictError()
+
+    logger.info("Booking %s cancelled", booking_id)
+    session.refresh(booking)
+    return booking
 
 
 def _get_booking_or_404(session: Session, user_id: int, booking_id: int) -> Booking:

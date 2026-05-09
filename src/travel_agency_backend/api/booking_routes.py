@@ -48,3 +48,23 @@ def get_booking(
 ):
     logger.info("User %s attempting to get booking %d", user.id, booking_id)
     return booking_services.get_booking(session, user, booking_id)
+
+
+@router.post("/{booking_id}/confirm", response_model=BookingOut)
+def confirm_booking(
+    booking_id: int,
+    user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    logger.info("User %s attempting to confirm booking %d", user.id, booking_id)
+    return booking_services.confirm_booking(session, user, booking_id)
+
+
+@router.post("/{booking_id}/cancel", response_model=BookingOut)
+def cancel_booking(
+    booking_id: int,
+    user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+):
+    logger.info("User %s attempting to cancel booking %d", user.id, booking_id)
+    return booking_services.cancel_booking(session, user, booking_id)

@@ -224,3 +224,23 @@ def _validate_seats_available(
     ):
         logger.info("Not enough available seats for user %s", user_id)
         raise CapacityExceededError()
+
+
+def expire_due_bookings(session: Session):
+    logger.info("Starting to expire due bookings")
+    to_change = session.scalars(
+        select(Booking).where(
+            Booking.status == BookingStatus.RESERVED,
+            Booking.payment_deadline < date.today(),
+        )
+    ).all()
+    try:
+        for booking in to_change:
+            booking.status = BookingStatus.EXPIRED
+            booking.expired_at = datetime.now(timezone.utc)
+        session.commit()
+        logger.info("%s due bookings expired", len(to_change))
+    except IntegrityError:
+        logger.warning("APScheduler failed to expire due bookings")
+        session.rollback()
+        raise BookingUpdateConflictError()

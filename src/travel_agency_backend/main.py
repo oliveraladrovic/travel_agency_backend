@@ -1,13 +1,27 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from contextlib import asynccontextmanager
 
 from .api import auth_routes, admin_routes, booking_routes
 from .api.unprotected import unprotected_trips_routes, unprotected_departures_routes
 from .api.middleware import RequestIDMiddleware
 from .utils.exceptions import DomainException
 from .config.logging import setup_logging
+from .utils.scheduler import scheduler, run_expire_due_bookings
 
 setup_logging()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    run_expire_due_bookings()
+    scheduler.start()
+
+    yield
+
+    if scheduler.running:
+        scheduler.shutdown()
+
 
 app = FastAPI(
     title="Travel Agency Backend",
@@ -23,6 +37,7 @@ The system supports:
 - Structured logging and request tracing
 - Integration testing with CI pipeline
 """,
+    lifespan=lifespan,
 )
 app.add_middleware(RequestIDMiddleware)
 app.include_router(auth_routes.router)

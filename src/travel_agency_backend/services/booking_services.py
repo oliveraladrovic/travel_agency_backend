@@ -56,6 +56,19 @@ def list_bookings(session: Session, user: User) -> list[Booking]:
     return session.scalars(select(Booking).where(Booking.user_id == user.id)).all()
 
 
+def list_bookings_admin(session: Session) -> list[Booking]:
+    return session.scalars(select(Booking)).all()
+
+
+def get_booking_admin(session: Session, booking_id: int) -> Booking:
+    booking = session.scalar(select(Booking).where(Booking.id == booking_id))
+    if booking is None:
+        logger.warning("Booking %s not found", booking_id)
+        raise BookingNotFoundError()
+
+    return booking
+
+
 def list_summary(session: Session, user: User) -> list[DepartureSummary]:
     departures = session.scalars(
         select(Departure).join(Booking).where(Booking.user_id == user.id).distinct()
@@ -69,6 +82,7 @@ def list_summary(session: Session, user: User) -> list[DepartureSummary]:
                 booking.seats_reserved
                 for booking in dep.bookings
                 if booking.user_id == user.id
+                and booking.status in (BookingStatus.CONFIRMED, BookingStatus.RESERVED)
             ),
             confirmed_seats=sum(
                 booking.seats_reserved

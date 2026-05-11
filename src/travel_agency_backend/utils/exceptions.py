@@ -119,3 +119,21 @@ class InvalidNumberOfSeatsError(DomainException):
     message: str = "Invalid number of seats"
     code: str = "INVALID_NUMBER_OF_SEATS"
     status_code: int = status.HTTP_409_CONFLICT
+
+
+class UserNotFoundError(DomainException):
+    message: str = "User not found"
+    code: str = "USER_NOT_FOUND"
+    status_code: int = status.HTTP_404_NOT_FOUND
+
+
+class UserUpdateConflictError(DomainException):
+    message: str = "Failed to update user data"
+    code: str = "USER_UPDATE_FAILED"
+    status_code: int = status.HTTP_409_CONFLICT
+
+
+class ActiveBookingExistsError(DomainException):
+    message: str = "User has active bookings"
+    code: str = "USER_HAS_ACTIVE_BOOKINGS"
+    status_code: int = status.HTTP_409_CONFLICT

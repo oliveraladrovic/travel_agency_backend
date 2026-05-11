@@ -24,6 +24,24 @@ class BookingOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class BookingOutAdmin(BaseModel):
+    id: int
+    user_id: int
+    departure_id: int
+    seats_reserved: int
+    price_per_seat_snapshot: Decimal
+    total_price_snapshot: Decimal
+    status: BookingStatus
+    created_at: datetime
+    updated_at: datetime
+    payment_deadline: date
+    confirmed_at: datetime | None = None
+    cancelled_at: datetime | None = None
+    expired_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class BookingSummary(BaseModel):
     id: int
     seats: int

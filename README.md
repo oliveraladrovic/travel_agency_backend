@@ -1,116 +1,256 @@
 # Travel Agency Backend
-Backend API for managing a travel agency booking system built with FastAPI, SQLAlchemy and PostgreSQL.
 
-This project is focused on real-world backend architecture and business rules rather than simple CRUD operations.
+Production-style backend API for a travel agency booking platform built with FastAPI.
+
+The application supports:
+- JWT authentication and role-based authorization
+- Trip, departure, and booking management
+- Admin and passenger workflows
+- Booking lifecycle management
+- Scheduled expiration jobs
+- Structured logging and request tracing
+- Integration testing with CI pipeline
+- Dockerized deployment
+
+## Live API
+
+- Swagger Docs:
+  https://travel-agency-backend-k3xm.onrender.com/docs
+
+- ReDoc:
+  https://travel-agency-backend-k3xm.onrender.com/redoc
 
 ## Features
-- User registration
+
+### Authentication & Authorization
+- JWT Bearer authentication
 - Password hashing with Argon2
-- PostgreSQL database
-- SQLAlchemy ORM
-- Alembic migrations
-- Structured service layer architecture
-- Domain exception handling
-- Request ID logging
-- Automated testing with pytest
-- GitHub Actions CI
+- Role-based access control (Admin / Passenger)
+- Protected admin endpoints
+- Ownership validation for user resources
+
+### Trip & Departure Management
+- Create, update, activate/deactivate, and delete trips
+- Create and manage departures
+- Public endpoints for active trips and departures
+- Soft delete support for historical data preservation
+
+### Booking System
+- Seat reservation system
+- Booking lifecycle:
+  - RESERVED
+  - CONFIRMED
+  - CANCELLED
+  - EXPIRED
+- Booking expiration scheduler
+- Capacity validation
+- User seat limit validation
+- Snapshot pricing system
+- Booking summaries grouped by departure
+
+### Background Jobs
+- APScheduler-based expiration job
+- Automatic expiration of overdue reserved bookings
+- Startup cleanup for expired reservations
+
+### Logging
+- Structured application logging
+- Request tracing using request IDs
+- Centralized logging configuration
+
+### Testing & CI
+- Pytest integration tests
+- Database transaction isolation in tests
+- GitHub Actions CI workflow
+- Automated test execution on push and pull request events
 
 ## Tech Stack
+
 - Python 3.12
 - FastAPI
-- SQLAlchemy 2.0
 - PostgreSQL
+- SQLAlchemy 2.0
 - Alembic
 - Pydantic
+- Pydantic Settings
+- JWT Authentication
+- Argon2
+- APScheduler
 - Pytest
+- Docker
 - GitHub Actions
 
 ## Project Structure
+
 ```
 travel_agency_backend/
-├── .github/
-├── alembic/
+├── .github/                          # CI workflow
+├── alembic/                          # Database migrations
 ├── src/travel_agency_backend/
-        ├── api/
-        ├── config/
-        ├── db/
-        ├── models/
-        ├── schemas/
-        ├── services/
-        ├── utils/
-        └── main.py # main entrypoint
-├── tests/
-├── .env
-├── .gitignore
-├── poetry.lock
-└── pyproject.toml
+        ├── api/                      # API routes
+        │   ├── admin/
+        │   ├── public/
+        │   ├── admin_routes.py
+        │   ├── auth_routes.py
+        │   ├── booking_routes.py
+        │   └── middleware.py
+        ├── config/                   # Application configuration
+        ├── db/                       # Database setup
+        ├── models/                   # SQLAlchemy models
+        ├── schemas/                  # Pydantic schemas
+        ├── services/                 # Business logic
+        ├── utils/                    # Exceptions, security, enums, scheduler
+        └── main.py                   # FastAPI application entry point
+├── tests/                            # Integration tests
+├── Dockerfile
+├── pyproject.toml
+└── README.md
 ```
 
-## Setup
-### Clone repository
+## Running Locally
+
+### 1. Clone Repository
+
 ```
 git clone https://github.com/oliveraladrovic/travel_agency_backend.git
-cd travel-agency-backend
+cd travel_agency_backend
 ```
 
-### Install dependencies
+### 2. Install Dependencies
+
 ```
 poetry install
 ```
 
-### Create .env file
+### 3. Create PostgreSQL Databases
+
+Create two PostgreSQL databases:
+
+- development database
+- test database
+
+Example names:
+- `travel_agency_db`
+- `travel_agency_test`
+
+### 4. Environment Variables
+
+Copy the example environment file:
+
 ```
 cp .env.example .env
 ```
-Create PostgreSQL databases and update the connection strings and JWT secret_key in `.env`.
 
-You can generate secure secret_key using:
+Update `.env` with your local database credentials and secret key.
+
+You can generate a secure secret key with:
+
 ```
-python -c "import secrets; print(secrets.token_hex(32))"
+python -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
 
-## Run migrations
+### 5. Run Database Migrations
+
 ```
 poetry run alembic upgrade head
 ```
 
-## Start development server
+### 6. Run Application
+
 ```
 poetry run uvicorn travel_agency_backend.main:app --reload
 ```
 
-## Run tests
+## API Documentation
+
+Swagger Docs:
+- http://localhost:8000/docs
+
+ReDoc:
+- http://localhost:8000/redoc
+
+## Running Tests
+
 ```
 poetry run pytest -v
 ```
 
-## API Documentation
-After starting the server:
+## Docker
 
-- Swagger UI:
-http://localhost:8000/docs
-- ReDoc:
-http://localhost:8000/redoc
+### 1. Create Docker Environment File
 
-## Current Status
-Implemented:
-- database models
-- migrations
-- registration flow
-- logging foundation
-- testing infrastructure
-- CI pipeline
-- JWT authentication
-- authorization
+```
+cp .env.example.docker .env.docker
+```
 
-In progress:
-- booking system
-- admin features
+Update `.env.docker`.
 
-## Design Goals
-This project aims to simulate a production-style backend system with:
-- layered architecture
-- domain-driven business rules
-- transactional integrity
-- concurrency-safe booking logic
-- maintainable and testable codebase
+### 2. Build Docker Image
+
+```
+docker build -t travel-agency-backend .
+```
+
+### 3. Run Docker Container
+
+```
+docker run --env-file .env.docker -p 8000:8000 travel-agency-backend
+```
+
+## CI Pipeline
+
+GitHub Actions workflow automatically runs tests on:
+- push events
+- pull request events
+
+## API Highlights
+
+### Public Endpoints
+
+- View active trips
+- View departures
+- User registration
+- User login
+
+### Passenger Endpoints
+
+- Create bookings
+- Confirm bookings
+- Cancel bookings
+- Update bookings
+- View booking summaries
+
+### Admin Endpoints
+
+- Manage users
+- Manage trips
+- Manage departures
+- View all bookings
+
+## Future Improvements
+
+- Pagination and filtering
+- Advanced admin dashboard endpoints
+- Email notifications
+- Payment integration
+- Concurrency-safe seat reservations
+- Row-level locking
+- Advanced booking lifecycle state machine
+- Rate limiting
+- Caching
+- Async migration
+- Kubernetes deployment
+
+## Deployment
+
+The application is deployed on Render using:
+- Docker container deployment
+- Managed PostgreSQL database
+- Environment-based configuration
+
+## Author
+
+Oliver Aladrović
+
+GitHub:
+https://github.com/oliveraladrovic

@@ -34,7 +34,7 @@ class DepartureOutAdmin(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class DepartureOutUnprotected(BaseModel):
+class DepartureOutPublic(BaseModel):
     id: int
     trip_id: int
     start_date: date

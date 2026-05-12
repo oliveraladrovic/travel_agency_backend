@@ -29,7 +29,7 @@ class TripOutAdmin(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class TripOutUnprotected(BaseModel):
+class TripOutPublic(BaseModel):
     id: int
     name: str
     slug: str

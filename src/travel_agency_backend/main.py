@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 
 from .api import auth_routes, admin_routes, booking_routes
-from .api.unprotected import unprotected_trips_routes, unprotected_departures_routes
+from .api.public import public_trips_routes, public_departures_routes
 from .api.middleware import RequestIDMiddleware
 from .utils.exceptions import DomainException
 from .config.logging import setup_logging
@@ -29,21 +29,22 @@ app = FastAPI(
     description="""
 Backend API for a travel agency booking platform built with FastAPI.
 
-The system supports:
+The system includes:
 - JWT authentication and role-based authorization
 - Trip, departure, and booking management
 - Admin and passenger workflows
-- Booking lifecycle enforcement
+- Booking lifecycle management and expiration jobs
 - Structured logging and request tracing
 - Integration testing with CI pipeline
+- Dockerized deployment
 """,
     lifespan=lifespan,
 )
 app.add_middleware(RequestIDMiddleware)
 app.include_router(auth_routes.router)
 app.include_router(admin_routes.router)
-app.include_router(unprotected_trips_routes.router)
-app.include_router(unprotected_departures_routes.router)
+app.include_router(public_trips_routes.router)
+app.include_router(public_departures_routes.router)
 app.include_router(booking_routes.router)
 
 

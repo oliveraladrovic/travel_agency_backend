@@ -17,9 +17,7 @@ DEP_DATA_2 = {
 }
 
 
-def test_list_unprotected_trips_success(
-    client: TestClient, admin_headers: dict[str, str]
-):
+def test_list_public_trips_success(client: TestClient, admin_headers: dict[str, str]):
     trip1 = client.post("/admin/trips/", headers=admin_headers, json=TRIP_1)
     assert trip1.status_code == 201
     trip2 = client.post("/admin/trips/", headers=admin_headers, json=TRIP_2)
@@ -30,9 +28,7 @@ def test_list_unprotected_trips_success(
     assert len(response.json()) == 1
 
 
-def test_get_unprotected_trip_success(
-    client: TestClient, admin_headers: dict[str, str]
-):
+def test_get_public_trip_success(client: TestClient, admin_headers: dict[str, str]):
     trip1 = client.post("/admin/trips/", headers=admin_headers, json=TRIP_1)
     assert trip1.status_code == 201
 
@@ -41,9 +37,7 @@ def test_get_unprotected_trip_success(
     assert response.json()["name"] == TRIP_1["name"]
 
 
-def test_get_unprotected_trip_inactive(
-    client: TestClient, admin_headers: dict[str, str]
-):
+def test_get_public_trip_inactive(client: TestClient, admin_headers: dict[str, str]):
     trip2 = client.post("/admin/trips/", headers=admin_headers, json=TRIP_2)
     assert trip2.status_code == 201
 
@@ -55,7 +49,7 @@ def test_get_unprotected_trip_inactive(
     assert error["message"] == "Trip not found"
 
 
-def test_get_unprotected_trip_404(client: TestClient, admin_headers: dict[str, str]):
+def test_get_public_trip_404(client: TestClient, admin_headers: dict[str, str]):
     trip2 = client.post("/admin/trips/", headers=admin_headers, json=TRIP_2)
     assert trip2.status_code == 201
 
@@ -67,7 +61,7 @@ def test_get_unprotected_trip_404(client: TestClient, admin_headers: dict[str, s
     assert error["message"] == "Trip not found"
 
 
-def test_list_unprotected_departures_by_trip_success(
+def test_list_public_departures_by_trip_success(
     client: TestClient, admin_headers: dict[str, str]
 ):
     trip1 = client.post("/admin/trips/", headers=admin_headers, json=TRIP_1)
@@ -93,7 +87,7 @@ def test_list_unprotected_departures_by_trip_success(
     assert response.json()[0]["id"] == departure2.json()["id"]
 
 
-def test_list_unprotected_departures_by_trip_inactive(
+def test_list_public_departures_by_trip_inactive(
     client: TestClient, admin_headers: dict[str, str]
 ):
     trip2 = client.post("/admin/trips/", headers=admin_headers, json=TRIP_2)
@@ -121,7 +115,7 @@ def test_list_unprotected_departures_by_trip_inactive(
     assert error["message"] == "Trip not found"
 
 
-def test_list_unprotected_departures_by_trip_not_existing(
+def test_list_public_departures_by_trip_not_existing(
     client: TestClient, admin_headers: dict[str, str]
 ):
     trip2 = client.post("/admin/trips/", headers=admin_headers, json=TRIP_2)
@@ -149,7 +143,7 @@ def test_list_unprotected_departures_by_trip_not_existing(
     assert error["message"] == "Trip not found"
 
 
-def test_get_unprotected_departure_success(
+def test_get_public_departure_success(
     client: TestClient, admin_headers: dict[str, str]
 ):
     trip1 = client.post("/admin/trips/", headers=admin_headers, json=TRIP_1)
@@ -168,7 +162,7 @@ def test_get_unprotected_departure_success(
     assert response.json()["capacity"] == departure_data["capacity"]
 
 
-def test_get_unprotected_departure_inactive(
+def test_get_public_departure_inactive(
     client: TestClient, admin_headers: dict[str, str]
 ):
     trip1 = client.post("/admin/trips/", headers=admin_headers, json=TRIP_1)
@@ -190,9 +184,7 @@ def test_get_unprotected_departure_inactive(
     assert error["message"] == "Departure not found"
 
 
-def test_get_unprotected_departure_404(
-    client: TestClient, admin_headers: dict[str, str]
-):
+def test_get_public_departure_404(client: TestClient, admin_headers: dict[str, str]):
     trip1 = client.post("/admin/trips/", headers=admin_headers, json=TRIP_1)
     trip_id = trip1.json()["id"]
 

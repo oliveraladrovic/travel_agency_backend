@@ -20,6 +20,9 @@ The application supports:
 - ReDoc:
   https://travel-agency-backend-k3xm.onrender.com/redoc
 
+> Note:
+> Admin endpoints require authentication and admin privileges.
+
 ## Features
 
 ### Authentication & Authorization
@@ -84,23 +87,23 @@ The application supports:
 
 ```
 travel_agency_backend/
-├── .github/                          # CI workflow
-├── alembic/                          # Database migrations
+├── .github/                      # CI workflow
+├── alembic/                      # Database migrations
 ├── src/travel_agency_backend/
-        ├── api/                      # API routes
-        │   ├── admin/
-        │   ├── public/
-        │   ├── admin_routes.py
-        │   ├── auth_routes.py
-        │   ├── booking_routes.py
-        │   └── middleware.py
-        ├── config/                   # Application configuration
-        ├── db/                       # Database setup
-        ├── models/                   # SQLAlchemy models
-        ├── schemas/                  # Pydantic schemas
-        ├── services/                 # Business logic
-        ├── utils/                    # Exceptions, security, enums, scheduler
-        └── main.py                   # FastAPI application entry point
+    ├── api/                      # API routes
+    │   ├── admin/
+    │   ├── public/
+    │   ├── admin_routes.py
+    │   ├── auth_routes.py
+    │   ├── booking_routes.py
+    │   └── middleware.py
+    ├── config/                   # Application configuration
+    ├── db/                       # Database setup
+    ├── models/                   # SQLAlchemy models
+    ├── schemas/                  # Pydantic schemas
+    ├── services/                 # Business logic
+    ├── utils/                    # Exceptions, security, enums, scheduler
+    └── main.py                   # FastAPI application entry point
 ├── tests/                            # Integration tests
 ├── Dockerfile
 ├── pyproject.toml
@@ -143,11 +146,11 @@ cp .env.example .env
 
 Update `.env` with your local database credentials and secret key.
 
-You can generate a secure secret key with:
+> Note: You can generate a secure secret key with:
 
-```
-python -c "import secrets; print(secrets.token_urlsafe(32))"
-```
+> ```
+> python -c "import secrets; print(secrets.token_urlsafe(32))"
+> ```
 
 ### 5. Run Database Migrations
 
@@ -247,6 +250,8 @@ The application is deployed on Render using:
 - Docker container deployment
 - Managed PostgreSQL database
 - Environment-based configuration
+> Note:
+> The application is deployed on Render free tier, so the first request may take a few moments while the service wakes up.
 
 ## Author
 
